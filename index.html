@@ -707,11 +707,7 @@ function submitToAirtable() {
   btn.innerHTML = '<div class="spinner" style="width:20px;height:20px;border-width:2px;margin:0"></div> 提交中...';
 
   var now = new Date();
-  var timestamp = now.getFullYear() + '-' + 
-    String(now.getMonth()+1).padStart(2,'0') + '-' +
-    String(now.getDate()).padStart(2,'0') + ' ' +
-    String(now.getHours()).padStart(2,'0') + ':' +
-    String(now.getMinutes()).padStart(2,'0');
+  var timestamp = now.toISOString();
 
   var essLabels = ['从不','轻微','中等','很可能'];
   var essFieldKeys = ['ESS_坐着阅读','ESS_看电视','ESS_公共场所','ESS_乘车一小时','ESS_午后躺下','ESS_与人交谈','ESS_午饭后静坐','ESS_遇堵停车'];
@@ -734,7 +730,7 @@ function submitToAirtable() {
   }
 
   var url = 'https://api.airtable.com/v0/' + AIRTABLE_BASE + '/' + encodeURIComponent(AIRTABLE_TABLE);
-  var body = JSON.stringify({records: [{fields: fields}]});
+  var body = JSON.stringify({fields: fields});
 
   fetch(url, {
     method: 'POST',
@@ -745,8 +741,13 @@ function submitToAirtable() {
     body: body
   })
   .then(function(resp) {
-    if (!resp.ok) throw new Error('HTTP ' + resp.status);
-    return resp.json();
+    return resp.json().then(function(data) {
+      if (!resp.ok) {
+        console.error('Airtable error:', JSON.stringify(data));
+        throw new Error('HTTP ' + resp.status);
+      }
+      return data;
+    });
   })
   .then(function(data) {
     goToPage('thanks-page');
