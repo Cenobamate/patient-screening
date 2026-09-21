@@ -470,10 +470,8 @@ var sbScore = 0;
 var essLevel = "";
 var sbLevel = "";
 
-// ===== Airtable Config =====
-var AIRTABLE_TOKEN = "patgI9vBYsvSVRxy0.8f379a283db2e38bcc50f36" + "da3bc82ee999f8a9a4d2afa4ea7ce831d3f60f8a6";
-var AIRTABLE_BASE = "appmSwRMXhWPaZSSB";
-var AIRTABLE_TABLE = "筛查记录";
+// ===== API Endpoint (Vercel proxy) =====
+var API_ENDPOINT = '/api/submit';
 
 // ===== Page Navigation =====
 function goToPage(pageId) {
@@ -729,16 +727,12 @@ function submitToAirtable() {
     fields[sbFieldKeys[j]] = sbAnswers[j] === 1 ? '是' : '否';
   }
 
-  var url = 'https://api.airtable.com/v0/' + AIRTABLE_BASE + '/' + encodeURIComponent(AIRTABLE_TABLE);
-  var body = JSON.stringify({fields: fields});
-
-  fetch(url, {
+  fetch(API_ENDPOINT, {
     method: 'POST',
     headers: {
-      'Authorization': 'Bearer ' + AIRTABLE_TOKEN,
       'Content-Type': 'application/json'
     },
-    body: body
+    body: JSON.stringify(fields)
   })
   .then(function(resp) {
     return resp.json().then(function(data) {
