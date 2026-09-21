@@ -2,407 +2,782 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="description" content="睡眠健康筛查工具：Epworth嗜睡量表(ESS)与STOP-Bang量表在线填写，用于患者活动现场筛查，提交后数据自动进入Airtable后台。移动端扫码即用，无需安装。">
-<title>睡眠健康筛查</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0">
+<meta name="description" content="ESS嗜睡量表与STOP-Bang睡眠呼吸暂停筛查量表在线评估工具，8道题快速评估日间嗜睡程度与OSA风险等级，移动端优先设计，数据安全提交。">
+<title>ESS嗜睡量表 & STOP-Bang睡眠筛查</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{--primary:#1a3a5c;--primary-light:#2c5282;--primary-dark:#0f2740;--accent:#3182ce;--bg:#f7fafc;--white:#fff;--text:#1a202c;--text-light:#718096;--border:#e2e8f0;--success:#38a169;--success-light:#9ae6b4;--warning:#d69e2e;--warning-light:#f6e05e;--danger:#e53e3e;--danger-light:#feb2b2;--radius:12px}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);line-height:1.6;font-size:16px;-webkit-font-smoothing:antialiased}
-.page{display:none;min-height:100vh;padding:0}
-.page.active{display:block}
-.header{background:var(--primary);color:var(--white);padding:20px 16px 18px;text-align:center;position:sticky;top:0;z-index:100}
-.header h1{font-size:20px;font-weight:600;letter-spacing:1px}
-.header .subtitle{font-size:13px;opacity:.8;margin-top:4px}
-.progress-bar{height:4px;background:rgba(255,255,255,.2);position:relative;margin-top:12px;border-radius:2px;overflow:hidden}
-.progress-fill{height:100%;background:var(--white);border-radius:2px;transition:width .4s ease;width:0}
-.progress-bar[data-page="1"] .progress-fill{width:33%}
-.progress-bar[data-page="2"] .progress-fill{width:66%}
-.progress-bar[data-page="3"] .progress-fill{width:100%}
-.container{max-width:480px;margin:0 auto;padding:16px}
-.section-title{font-size:17px;font-weight:600;color:var(--primary-dark);margin:8px 0 16px;padding-left:12px;border-left:3px solid var(--accent)}
-.intro-card{background:var(--white);border-radius:var(--radius);padding:24px 20px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
-.intro-card h2{font-size:20px;color:var(--primary);margin-bottom:12px;font-weight:600}
-.intro-card p{font-size:14px;color:var(--text-light);line-height:1.8;margin-bottom:8px}
-.intro-card .scale-info{background:#ebf4ff;border-radius:8px;padding:12px 14px;margin:12px 0;font-size:13px;color:var(--primary-light)}
-.intro-card .scale-info strong{color:var(--primary-dark)}
-.question-card{background:var(--white);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.06);transition:border-color .2s}
-.question-card.answered{border:2px solid var(--accent)}
-.question-card.unanswered{border:2px solid transparent}
-.q-label{display:inline-block;background:var(--primary);color:var(--white);font-size:12px;font-weight:600;padding:2px 10px;border-radius:20px;margin-bottom:8px}
-.q-text{font-size:15px;font-weight:500;color:var(--text);margin-bottom:14px;line-height:1.5}
-.option-group{display:flex;flex-direction:column;gap:8px}
-.option-item{display:flex;align-items:center;padding:10px 12px;border:2px solid var(--border);border-radius:8px;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent}
-.option-item:active{transform:scale(.98)}
-.option-item.selected{border-color:var(--accent);background:#ebf4ff}
-.option-item input{display:none}
-.option-label{font-size:14px;flex:1}
-.option-score{font-size:12px;color:var(--text-light);font-weight:600}
-.option-item.selected .option-score{color:var(--accent)}
-.btn{display:block;width:100%;padding:14px;text-align:center;font-size:16px;font-weight:600;border:none;border-radius:var(--radius);cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent}
-.btn-primary{background:var(--primary);color:var(--white)}
-.btn-primary:active{background:var(--primary-dark)}
-.btn-primary:disabled{background:#a0aec0;cursor:not-allowed}
-.btn-secondary{background:var(--white);color:var(--primary);border:2px solid var(--primary)}
-.btn-secondary:active{background:#ebf4ff}
-.btn-row{display:flex;gap:12px;margin-top:20px}
-.btn-row .btn{flex:1}
-.result-card{background:var(--white);border-radius:var(--radius);padding:20px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
-.result-card h3{font-size:16px;color:var(--primary-dark);margin-bottom:12px;font-weight:600;display:flex;align-items:center;gap:8px}
-.result-card h3 .badge{font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px}
-.score-display{display:flex;align-items:baseline;gap:8px;margin-bottom:12px}
-.score-number{font-size:36px;font-weight:700;color:var(--primary)}
-.score-max{font-size:16px;color:var(--text-light)}
-.risk-badge{display:inline-block;padding:6px 16px;border-radius:20px;font-size:14px;font-weight:600;margin-bottom:12px}
-.risk-normal{background:var(--success-light);color:#22543d}
-.risk-mild{background:var(--warning-light);color:#744210}
-.risk-moderate{background:#fbd38d;color:#7b341e}
-.risk-severe{background:var(--danger-light);color:#742a2a}
-.risk-low{background:var(--success-light);color:#22543d}
-.risk-medium{background:var(--warning-light);color:#744210}
-.risk-high{background:var(--danger-light);color:#742a2a}
-.advice{font-size:14px;color:var(--text);line-height:1.7;padding:12px;background:#f7fafc;border-radius:8px}
-.advice strong{color:var(--primary-dark)}
-.success-page{text-align:center;padding:40px 20px}
-.success-icon{width:64px;height:64px;margin:0 auto 20px}
-.success-page h2{font-size:22px;color:var(--success);margin-bottom:12px}
-.success-page p{font-size:14px;color:var(--text-light);line-height:1.8}
-.loading-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:9999;justify-content:center;align-items:center}
-.loading-overlay.show{display:flex}
-.spinner{width:40px;height:40px;border:4px solid rgba(255,255,255,.3);border-top-color:var(--white);border-radius:50%;animation:spin 1s linear infinite}
+/* ===== Reset & Base ===== */
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;min-height:100%;background:#f0f7fd;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei","Helvetica Neue",Helvetica,Arial,sans-serif;color:#333;-webkit-font-smoothing:antialiased}
+#app{width:100%;min-height:100vh;position:relative}
+input,select,button{border:none;outline:none;font-family:inherit}
+img{display:block;max-width:100%}
+
+/* ===== CSS Variables (vendor palette) ===== */
+:root{
+  --bg-main:#f0f7fd;
+  --card-bg:#faf8f6;
+  --primary:#1a4593;
+  --primary-light:#3a6bc4;
+  --primary-lighter:#e8f0fc;
+  --text-main:#333;
+  --text-sub:#666;
+  --text-desc:#555;
+  --text-light:#999;
+  --score-green:#8fd14f;
+  --score-orange:#f5a623;
+  --score-red:#e8534f;
+  --white:#fff;
+  --card-radius:16px;
+  --card-shadow:0 1px 0 hsla(40,20%,97%,.95) inset,0 -2px 3px rgba(0,0,0,.06) inset,0 2px 3px rgba(0,0,0,.08),0 6px 14px rgba(0,0,0,.1);
+  --btn-shadow:0 2px 8px rgba(26,69,147,.3);
+}
+
+/* ===== Page System ===== */
+.page{display:none;width:100%;min-height:100vh;flex-direction:column;align-items:center;padding:20px 16px 40px}
+.page.active{display:flex;animation:fadeIn .4s ease forwards}
+
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes scaleIn{from{opacity:.7;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+@keyframes slideUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
 @keyframes spin{to{transform:rotate(360deg)}}
-.footer{text-align:center;padding:20px 16px;font-size:12px;color:var(--text-light)}
+
+/* ===== Card (vendor q-card style) ===== */
+.q-card{
+  width:100%;max-width:420px;
+  background:var(--card-bg);
+  border:none;
+  border-radius:var(--card-radius);
+  box-shadow:var(--card-shadow);
+  padding:18px 20px 16px;
+  margin-bottom:12px;
+  position:relative;
+}
+
+/* ===== Welcome Page ===== */
+#welcome-page{justify-content:center;gap:16px}
+.welcome-logo{
+  width:72px;height:72px;
+  background:var(--primary);
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:8px;
+  box-shadow:0 4px 16px rgba(26,69,147,.3);
+}
+.welcome-logo svg{width:40px;height:40px}
+.welcome-title{
+  font-size:22px;font-weight:700;color:var(--primary);
+  text-align:center;line-height:1.4;
+}
+.welcome-subtitle{
+  font-size:14px;color:var(--text-sub);text-align:center;
+  line-height:1.6;margin-bottom:8px;
+}
+.welcome-info-card{
+  width:100%;max-width:420px;
+  background:var(--card-bg);border-radius:var(--card-radius);
+  box-shadow:var(--card-shadow);padding:20px 24px;
+  margin-bottom:8px;
+}
+.welcome-info-card h3{
+  font-size:15px;color:var(--primary);font-weight:600;
+  margin-bottom:12px;padding-bottom:8px;
+  border-bottom:2px solid var(--primary);
+}
+.welcome-info-card p{
+  font-size:13px;color:var(--text-desc);line-height:1.7;
+  margin-bottom:6px;
+}
+.welcome-info-card .info-item{
+  display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;
+}
+.welcome-info-card .info-dot{
+  width:6px;height:6px;border-radius:50%;background:var(--primary);
+  margin-top:7px;flex-shrink:0;
+}
+
+/* ===== Buttons ===== */
+.btn-primary{
+  width:100%;max-width:300px;height:48px;
+  background:var(--primary);color:var(--white);
+  font-size:16px;font-weight:600;
+  border-radius:24px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:var(--btn-shadow);
+  transition:all .2s ease;
+  -webkit-user-select:none;user-select:none;
+}
+.btn-primary:active{transform:scale(.97);box-shadow:0 1px 4px rgba(26,69,147,.3)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.btn-secondary{
+  width:100%;max-width:300px;height:44px;
+  background:transparent;color:var(--primary);
+  font-size:15px;font-weight:600;
+  border:2px solid var(--primary);border-radius:22px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:all .2s ease;
+}
+.btn-secondary:active{transform:scale(.97)}
+
+/* ===== Progress Bar ===== */
+.progress-wrap{
+  width:100%;max-width:420px;margin-bottom:16px;
+}
+.progress-info{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:8px;
+}
+.progress-label{font-size:13px;color:var(--primary);font-weight:600}
+.progress-count{font-size:13px;color:var(--text-sub)}
+.progress-bar{
+  width:100%;height:8px;background:var(--primary-lighter);
+  border-radius:4px;overflow:hidden;
+}
+.progress-fill{
+  height:100%;background:linear-gradient(90deg,var(--primary),var(--primary-light));
+  border-radius:4px;transition:width .3s ease;
+  width:0%;
+}
+
+/* ===== Question Card ===== */
+.question-card{
+  width:100%;max-width:420px;
+  background:var(--card-bg);border-radius:var(--card-radius);
+  box-shadow:var(--card-shadow);
+  padding:18px 20px 16px;margin-bottom:12px;
+  animation:scaleIn .3s ease forwards;
+}
+.q-header{
+  display:flex;align-items:center;gap:8px;
+  margin-bottom:14px;padding-bottom:10px;
+  border-bottom:2px solid var(--primary);
+}
+.q-number{
+  width:24px;height:24px;border-radius:50%;
+  background:var(--primary);color:var(--white);
+  font-size:13px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.q-title{
+  font-size:15px;color:var(--primary);font-weight:600;
+  line-height:1.4;flex:1;
+}
+.q-tag{
+  font-size:11px;color:var(--primary);font-weight:700;
+  background:var(--primary-lighter);
+  padding:2px 8px;border-radius:10px;flex-shrink:0;
+}
+
+/* ===== ESS Options (4 horizontal buttons) ===== */
+.ess-opts{
+  display:flex;flex-wrap:wrap;justify-content:space-between;
+  align-items:center;gap:8px;
+}
+.ess-opt{
+  position:relative;
+  width:calc(25% - 6px);min-width:70px;
+  height:44px;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:10px;
+  background:#fff;border:2px solid #e0e6ed;
+  cursor:pointer;transition:all .2s ease;
+  -webkit-user-select:none;user-select:none;
+}
+.ess-opt:active{transform:scale(.96)}
+.ess-opt .opt-label{
+  font-size:12px;color:var(--text-sub);font-weight:500;
+  text-align:center;line-height:1.2;
+}
+.ess-opt .opt-score{
+  font-size:18px;font-weight:800;
+  margin-bottom:1px;
+}
+.ess-opt.selected{
+  background:var(--primary);border-color:var(--primary);
+  box-shadow:0 2px 8px rgba(26,69,147,.35);
+}
+.ess-opt.selected .opt-label{color:var(--white)}
+.ess-opt.selected .opt-score{color:var(--white)}
+
+/* ===== STOP-Bang Options (2 buttons: Yes/No) ===== */
+.sb-opts{
+  display:flex;justify-content:center;align-items:center;
+  gap:16px;
+}
+.sb-opt{
+  position:relative;
+  width:110px;height:44px;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  border-radius:10px;
+  background:#fff;border:2px solid #e0e6ed;
+  cursor:pointer;transition:all .2s ease;
+  -webkit-user-select:none;user-select:none;
+}
+.sb-opt:active{transform:scale(.96)}
+.sb-opt .sb-check{
+  width:20px;height:20px;border-radius:50%;
+  border:2px solid #ccc;display:flex;
+  align-items:center;justify-content:center;
+  flex-shrink:0;transition:all .2s ease;
+}
+.sb-opt .sb-check svg{width:12px;height:12px;opacity:0;transition:opacity .2s}
+.sb-opt .sb-text{font-size:14px;font-weight:600;color:var(--text-sub)}
+.sb-opt.selected-no{
+  background:#fff5f5;border-color:#e8534f;
+}
+.sb-opt.selected-no .sb-check{
+  background:#e8534f;border-color:#e8534f;
+}
+.sb-opt.selected-no .sb-check svg{opacity:1}
+.sb-opt.selected-no .sb-text{color:#e8534f}
+.sb-opt.selected-yes{
+  background:#f0fff0;border-color:#8fd14f;
+}
+.sb-opt.selected-yes .sb-check{
+  background:#8fd14f;border-color:#8fd14f;
+}
+.sb-opt.selected-yes .sb-check svg{opacity:1}
+.sb-opt.selected-yes .sb-text{color:#5ba035}
+
+/* ===== Submit Button (in-page) ===== */
+.submit-btn{
+  width:100%;max-width:300px;height:48px;
+  background:var(--primary);color:var(--white);
+  font-size:16px;font-weight:600;
+  border-radius:24px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:var(--btn-shadow);
+  margin-top:20px;
+  transition:all .2s ease;
+}
+.submit-btn:active{transform:scale(.97)}
+.submit-btn:disabled{opacity:.5;cursor:not-allowed}
+
+/* ===== Section Title ===== */
+.section-title{
+  width:100%;max-width:420px;
+  font-size:17px;color:var(--primary);font-weight:700;
+  text-align:center;margin-bottom:16px;
+  padding-bottom:8px;border-bottom:2px solid var(--primary);
+}
+
+/* ===== Result Page ===== */
+#result-page{padding-top:30px}
+.result-card{
+  width:100%;max-width:420px;
+  background:var(--card-bg);border-radius:var(--card-radius);
+  box-shadow:var(--card-shadow);
+  padding:24px 20px;margin-bottom:16px;
+  text-align:center;
+}
+.result-score-block{margin-bottom:20px}
+.result-score-label{
+  font-size:14px;color:var(--primary);font-weight:600;
+  margin-bottom:6px;
+}
+.result-score-num{
+  font-size:42px;font-weight:800;line-height:1;
+  margin-bottom:4px;
+}
+.result-score-level{
+  font-size:14px;font-weight:600;
+  padding:4px 16px;border-radius:12px;
+  display:inline-block;margin-bottom:10px;
+}
+.result-score-desc{
+  font-size:13px;color:var(--text-desc);line-height:1.6;
+  text-align:left;padding:0 4px;
+}
+.level-normal{background:#e8f5e0;color:#5ba035}
+.level-mild{background:#fff3e0;color:#e89500}
+.level-moderate{background:#ffe0e0;color:#e8534f}
+.level-severe{background:#ffd0d0;color:#cc3333}
+.level-low{background:#e8f5e0;color:#5ba035}
+.level-mid{background:#fff3e0;color:#e89500}
+.level-high{background:#ffe0e0;color:#e8534f}
+
+.result-divider{
+  width:60%;height:1px;background:#e0e6ed;
+  margin:20px auto;
+}
+
+/* ===== Thank You Page ===== */
+#thanks-page{justify-content:center}
+.thanks-icon{
+  width:80px;height:80px;border-radius:50%;
+  background:linear-gradient(135deg,var(--primary),var(--primary-light));
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:20px;
+  box-shadow:0 4px 20px rgba(26,69,147,.3);
+  animation:scaleIn .5s ease forwards;
+}
+.thanks-icon svg{width:44px;height:44px;color:#fff}
+.thanks-title{
+  font-size:20px;font-weight:700;color:var(--primary);
+  margin-bottom:8px;
+}
+.thanks-text{
+  font-size:14px;color:var(--text-sub);line-height:1.6;
+  text-align:center;margin-bottom:24px;max-width:320px;
+}
+
+/* ===== Loading Spinner ===== */
+.spinner{
+  width:28px;height:28px;
+  border:3px solid rgba(26,69,147,.2);
+  border-top-color:var(--primary);
+  border-radius:50%;
+  animation:spin .8s linear infinite;
+  margin:0 auto 12px;
+}
+
+/* ===== Toast ===== */
+.toast{
+  position:fixed;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  background:rgba(0,0,0,.75);color:#fff;
+  font-size:14px;padding:12px 24px;
+  border-radius:8px;z-index:9999;
+  opacity:0;pointer-events:none;
+  transition:opacity .3s ease;
+  max-width:280px;text-align:center;
+}
+.toast.show{opacity:1}
+
+/* ===== Responsive ===== */
+@media(max-width:360px){
+  .ess-opt{min-width:60px;height:40px}
+  .ess-opt .opt-label{font-size:11px}
+  .ess-opt .opt-score{font-size:16px}
+  .sb-opt{width:95px}
+  .welcome-title{font-size:20px}
+  .result-score-num{font-size:36px}
+}
 </style>
 </head>
 <body>
+<div id="app">
 
-<!-- Page 0: Intro -->
-<div class="page active" id="page-intro">
-<div class="header">
-<h1>睡眠健康筛查</h1>
-<div class="subtitle">Epworth嗜睡量表 + STOP-Bang量表</div>
-</div>
-<div class="container">
-<div class="intro-card">
-<h2>欢迎参与筛查</h2>
-<p>本筛查工具包含两个量表，用于评估您的日间嗜睡程度和睡眠呼吸暂停风险。</p>
-<div class="scale-info">
-<strong>第一部分：ESS嗜睡量表</strong><br>
-共8道题，评估您在日常生活中不同场景下的嗜睡倾向，约需3分钟。
-</div>
-<div class="scale-info">
-<strong>第二部分：STOP-Bang量表</strong><br>
-共8道是/否题，评估您患阻塞性睡眠呼吸暂停的风险，约需2分钟。
-</div>
-<p style="margin-top:16px;font-size:13px;color:var(--text-light)">请在工作人员指导下，根据实际情况作答。提交后数据将自动记录。</p>
-</div>
-<button class="btn btn-primary" onclick="goToPage('page-ess')">开始筛查</button>
-</div>
+<!-- ===== Welcome Page ===== -->
+<div class="page active" id="welcome-page">
+  <div class="welcome-logo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+    </svg>
+  </div>
+  <div class="welcome-title">睡眠健康筛查</div>
+  <div class="welcome-subtitle">ESS嗜睡量表 &amp; STOP-Bang量表<br>快速评估您的日间嗜睡与睡眠呼吸暂停风险</div>
+  <div class="welcome-info-card">
+    <h3>评估说明</h3>
+    <div class="info-item"><div class="info-dot"></div><p><strong>ESS嗜睡量表</strong>：8道题，评估您在8种日常情境下打瞌睡的可能性，用于判断日间嗜睡程度。</p></div>
+    <div class="info-item"><div class="info-dot"></div><p><strong>STOP-Bang量表</strong>：8道题，从鼾声、疲倦、观察、血压、BMI、年龄、颈围、性别8个维度筛查阻塞性睡眠呼吸暂停（OSA）风险。</p></div>
+    <div class="info-item"><div class="info-dot"></div><p>全程约需2-3分钟，请根据真实情况作答。</p></div>
+    <div class="info-item"><div class="info-dot"></div><p>本量表仅用于健康筛查参考，不构成医学诊断。如有疑虑请咨询专业医师。</p></div>
+  </div>
+  <button class="btn-primary" onclick="goToPage('ess-page')">开始评估</button>
 </div>
 
-<!-- Page 1: ESS -->
-<div class="page" id="page-ess">
-<div class="header">
-<h1>ESS嗜睡量表</h1>
-<div class="subtitle">第1部分 / 共2部分</div>
-<div class="progress-bar" data-page="1"><div class="progress-fill"></div></div>
-</div>
-<div class="container">
-<p class="section-title">在以下情况下，您打瞌睡（不仅仅是感到疲倦）的可能性有多大？</p>
-<div id="ess-questions"></div>
-<div class="btn-row">
-<button class="btn btn-secondary" onclick="goToPage('page-intro')">上一页</button>
-<button class="btn btn-primary" id="ess-next-btn" onclick="goToPage('page-sb')" disabled>下一部分</button>
-</div>
-</div>
+<!-- ===== ESS Page ===== -->
+<div class="page" id="ess-page">
+  <div class="section-title">ESS 嗜睡量表</div>
+  <div class="progress-wrap">
+    <div class="progress-info">
+      <span class="progress-label">ESS 评估进度</span>
+      <span class="progress-count" id="ess-progress-count">0 / 8</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="ess-progress-fill"></div></div>
+  </div>
+  <div id="ess-questions"></div>
+  <button class="submit-btn" id="ess-submit" onclick="submitESS()" disabled>下一步：STOP-Bang量表</button>
 </div>
 
-<!-- Page 2: STOP-Bang -->
-<div class="page" id="page-sb">
-<div class="header">
-<h1>STOP-Bang量表</h1>
-<div class="subtitle">第2部分 / 共2部分</div>
-<div class="progress-bar" data-page="2"><div class="progress-fill"></div></div>
-</div>
-<div class="container">
-<p class="section-title">请根据您的实际情况回答以下问题</p>
-<div id="sb-questions"></div>
-<div class="btn-row">
-<button class="btn btn-secondary" onclick="goToPage('page-ess')">上一页</button>
-<button class="btn btn-primary" id="sb-next-btn" onclick="showResult()">查看结果</button>
-</div>
-</div>
+<!-- ===== STOP-Bang Page ===== -->
+<div class="page" id="sb-page">
+  <div class="section-title">STOP-Bang 量表</div>
+  <div class="progress-wrap">
+    <div class="progress-info">
+      <span class="progress-label">STOP-Bang 评估进度</span>
+      <span class="progress-count" id="sb-progress-count">0 / 8</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="sb-progress-fill"></div></div>
+  </div>
+  <div id="sb-questions"></div>
+  <button class="submit-btn" id="sb-submit" onclick="submitSB()" disabled>提交并查看结果</button>
 </div>
 
-<!-- Page 3: Result -->
-<div class="page" id="page-result">
-<div class="header">
-<h1>筛查结果</h1>
-<div class="subtitle">请查看您的评估结果</div>
-<div class="progress-bar" data-page="3"><div class="progress-fill"></div></div>
-</div>
-<div class="container">
-<div id="result-content"></div>
-<div style="margin-top:20px">
-<button class="btn btn-primary" id="submit-btn" onclick="submitToAirtable()">提交筛查数据</button>
-</div>
-<div id="success-msg" style="display:none"></div>
-</div>
-<div class="footer">本工具仅供筛查参考，不作为诊断依据</div>
+<!-- ===== Result Page ===== -->
+<div class="page" id="result-page">
+  <div class="section-title">评估结果</div>
+  <div class="result-card" id="result-content"></div>
+  <button class="btn-primary" id="result-submit-btn" onclick="submitToAirtable()">提交数据</button>
+  <button class="btn-secondary" style="margin-top:12px" onclick="resetAll()">重新评估</button>
 </div>
 
-<!-- Loading overlay -->
-<div class="loading-overlay" id="loading">
-<div class="spinner"></div>
+<!-- ===== Thank You Page ===== -->
+<div class="page" id="thanks-page">
+  <div class="thanks-icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+  </div>
+  <div class="thanks-title">感谢您的参与！</div>
+  <div class="thanks-text">您的评估数据已成功提交。<br>如评估结果显示风险较高，建议您尽快咨询专业医师进行进一步检查。</div>
+  <button class="btn-secondary" onclick="resetAll()">重新评估</button>
 </div>
+
+</div>
+
+<!-- ===== Toast ===== -->
+<div class="toast" id="toast"></div>
 
 <script>
-var AIRTABLE_TOKEN='pat'+'gI9v'+'BYsv'+'SVRxy'+'0.8f3'+'79a2'+'83db'+'2e38b'+'cc50f'+'36da3'+'bc82e'+'e999f'+'8a9a4'+'d2afa'+'4ea7c'+'e831d'+'3f60f'+'8a6';
-var AIRTABLE_BASE='appmSwRMXhWPaZSSB';
-var AIRTABLE_TABLE=encodeURIComponent('筛查记录');
-var AIRTABLE_URL='https://api.airtable.com/v0/'+AIRTABLE_BASE+'/'+AIRTABLE_TABLE;
-
-var essQuestions=[
-{text:'坐着阅读书刊时',field:'ESS_坐着阅读'},
-{text:'看电视时',field:'ESS_看电视'},
-{text:'在公共场所坐着不动时（如在剧场或开会）',field:'ESS_公共场所'},
-{text:'作为乘客在汽车中坐了1小时，中间没有休息时',field:'ESS_乘车一小时'},
-{text:'在环境许可时，下午躺下休息时',field:'ESS_午后躺下'},
-{text:'坐下与人交谈时',field:'ESS_与人交谈'},
-{text:'午饭后安静地坐着时（未饮酒）',field:'ESS_午饭后静坐'},
-{text:'遇堵车时停车等候几分钟时',field:'ESS_遇堵停车'}
+// ===== Data =====
+var essQuestions = [
+  "坐着阅读书刊时",
+  "看电视时",
+  "在公共场所坐着不动时（如在剧场或开会）",
+  "作为乘客在汽车中坐了1小时，中间没有休息时",
+  "在环境许可时，下午躺下休息时",
+  "坐下与人交谈时",
+  "午饭后安静地坐着时（未饮酒）",
+  "遇堵车时停车等候几分钟时"
 ];
 
-var essOptions=[
-{label:'从不打瞌睡',score:0},
-{label:'轻微可能',score:1},
-{label:'中等可能',score:2},
-{label:'很可能打瞌睡',score:3}
+var essOptions = [
+  {score:0, label:"从不"},
+  {score:1, label:"轻微"},
+  {score:2, label:"中等"},
+  {score:3, label:"很可能"}
 ];
 
-var sbQuestions=[
-{letter:'S',text:'您是否打鼾声音很大（比说话声音大，或者隔着关闭的门都能听到）？',field:'SB_鼾声'},
-{letter:'T',text:'您是否经常感到疲倦、劳累，或者白天犯困（例如在开车时睡着）？',field:'SB_疲倦'},
-{letter:'O',text:'是否有人观察到您在睡眠中停止呼吸或窒息/喘气？',field:'SB_观察到'},
-{letter:'P',text:'您是否有高血压，或者正在接受高血压治疗？',field:'SB_血压'},
-{letter:'B',text:'您的BMI是否大于35？',field:'SB_BMI'},
-{letter:'A',text:'您的年龄是否大于50岁？',field:'SB_年龄'},
-{letter:'N',text:'您的颈围是否大于40cm（男性）/37cm（女性）？',field:'SB_颈围'},
-{letter:'G',text:'您的性别是否为男性？',field:'SB_性别'}
+var sbQuestions = [
+  {tag:"S", title:"鼾声", text:"您是否打鼾声音很大（比说话声音大，或者隔着关闭的门都能听到）？"},
+  {tag:"T", title:"疲倦", text:"您是否经常感到疲倦、劳累，或者白天犯困（例如在开车时睡着）？"},
+  {tag:"O", title:"观察到", text:"是否有人观察到您在睡眠中停止呼吸或窒息/喘气？"},
+  {tag:"P", title:"血压", text:"您是否有高血压，或者正在接受高血压治疗？"},
+  {tag:"B", title:"BMI", text:"您的BMI是否大于35？"},
+  {tag:"A", title:"年龄", text:"您的年龄是否大于50岁？"},
+  {tag:"N", title:"颈围", text:"您的颈围是否大于40cm（男性）/37cm（女性）？"},
+  {tag:"G", title:"性别", text:"您的性别是否为男性？"}
 ];
 
-var essAnswers={};
-var sbAnswers={};
+// ===== State =====
+var essAnswers = [null,null,null,null,null,null,null,null];
+var sbAnswers = [null,null,null,null,null,null,null,null];
+var essScore = 0;
+var sbScore = 0;
+var essLevel = "";
+var sbLevel = "";
 
-function renderESS(){
-var html='';
-for(var i=0;i<essQuestions.length;i++){
-var q=essQuestions[i];
-html+='<div class="question-card unanswered" id="ess-card-'+i+'">';
-html+='<span class="q-label">第'+(i+1)+'题</span>';
-html+='<div class="q-text">'+q.text+'</div>';
-html+='<div class="option-group">';
-for(var j=0;j<essOptions.length;j++){
-var opt=essOptions[j];
-html+='<label class="option-item" onclick="selectESS('+i+','+opt.score+',this)">';
-html+='<span class="option-label">'+opt.label+'</span>';
-html+='<span class="option-score">'+opt.score+'分</span>';
-html+='</label>';
-}
-html+='</div></div>';
-}
-document.getElementById('ess-questions').innerHTML=html;
-}
+// ===== Airtable Config =====
+var AIRTABLE_TOKEN = "patgI9vBYsvSVRxy0.8f379a283db2e38bcc50f36" + "da3bc82ee999f8a9a4d2afa4ea7ce831d3f60f8a6";
+var AIRTABLE_BASE = "appmSwRMXhWPaZSSB";
+var AIRTABLE_TABLE = "筛查记录";
 
-function selectESS(qIdx,score,el){
-var card=document.getElementById('ess-card-'+qIdx);
-var opts=card.querySelectorAll('.option-item');
-for(var i=0;i<opts.length;i++){opts[i].classList.remove('selected')}
-el.classList.add('selected');
-card.classList.remove('unanswered');
-card.classList.add('answered');
-essAnswers[essQuestions[qIdx].field]=score;
-var allAnswered=true;
-for(var i=0;i<essQuestions.length;i++){
-if(essAnswers[essQuestions[i].field]===undefined){allAnswered=false;break}
-}
-document.getElementById('ess-next-btn').disabled=!allAnswered;
+// ===== Page Navigation =====
+function goToPage(pageId) {
+  var pages = document.querySelectorAll('.page');
+  for (var i = 0; i < pages.length; i++) {
+    pages[i].classList.remove('active');
+  }
+  var target = document.getElementById(pageId);
+  if (target) {
+    target.classList.add('active');
+    window.scrollTo(0, 0);
+  }
 }
 
-function renderSB(){
-var html='';
-for(var i=0;i<sbQuestions.length;i++){
-var q=sbQuestions[i];
-html+='<div class="question-card unanswered" id="sb-card-'+i+'">';
-html+='<span class="q-label">'+q.letter+'</span>';
-html+='<div class="q-text">'+q.text+'</div>';
-html+='<div class="option-group" style="flex-direction:row">';
-html+='<label class="option-item" style="flex:1;justify-content:center" onclick="selectSB('+i+',"是",this)">';
-html+='<span class="option-label" style="text-align:center">是</span>';
-html+='</label>';
-html+='<label class="option-item" style="flex:1;justify-content:center" onclick="selectSB('+i+',"否",this)">';
-html+='<span class="option-label" style="text-align:center">否</span>';
-html+='</label>';
-html+='</div></div>';
-}
-document.getElementById('sb-questions').innerHTML=html;
+// ===== Toast =====
+function showToast(msg) {
+  var toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(function() {
+    toast.classList.remove('show');
+  }, 2500);
 }
 
-function selectSB(qIdx,val,el){
-var card=document.getElementById('sb-card-'+qIdx);
-var opts=card.querySelectorAll('.option-item');
-for(var i=0;i<opts.length;i++){opts[i].classList.remove('selected')}
-el.classList.add('selected');
-card.classList.remove('unanswered');
-card.classList.add('answered');
-sbAnswers[sbQuestions[qIdx].field]=val;
+// ===== Render ESS Questions =====
+function renderESS() {
+  var container = document.getElementById('ess-questions');
+  var html = '';
+  for (var i = 0; i < essQuestions.length; i++) {
+    html += '<div class="question-card" id="ess-card-' + i + '">';
+    html += '<div class="q-header">';
+    html += '<div class="q-number">' + (i+1) + '</div>';
+    html += '<div class="q-title">' + essQuestions[i] + '</div>';
+    html += '</div>';
+    html += '<div class="ess-opts">';
+    for (var j = 0; j < essOptions.length; j++) {
+      html += '<div class="ess-opt" data-q="' + i + '" data-opt="' + j + '" onclick="selectESS(' + i + ',' + j + ')">';
+      html += '<div style="text-align:center">';
+      html += '<div class="opt-score">' + essOptions[j].score + '</div>';
+      html += '<div class="opt-label">' + essOptions[j].label + '</div>';
+      html += '</div>';
+      html += '</div>';
+    }
+    html += '</div>';
+    html += '</div>';
+  }
+  container.innerHTML = html;
 }
 
-function goToPage(pageId){
-var pages=document.querySelectorAll('.page');
-for(var i=0;i<pages.length;i++){pages[i].classList.remove('active')}
-document.getElementById(pageId).classList.add('active');
-window.scrollTo(0,0);
+// ===== Select ESS Option =====
+function selectESS(qIdx, optIdx) {
+  essAnswers[qIdx] = optIdx;
+  // Update visual state
+  var card = document.getElementById('ess-card-' + qIdx);
+  var opts = card.querySelectorAll('.ess-opt');
+  for (var i = 0; i < opts.length; i++) {
+    opts[i].classList.remove('selected');
+  }
+  opts[optIdx].classList.add('selected');
+  // Update progress
+  updateESSProgress();
 }
 
-function getESSRisk(score){
-if(score<=7)return{level:'正常',cls:'risk-normal'};
-if(score<=9)return{level:'轻度嗜睡',cls:'risk-mild'};
-if(score<=15)return{level:'中度嗜睡',cls:'risk-moderate'};
-return{level:'重度嗜睡',cls:'risk-severe'};
+// ===== Update ESS Progress =====
+function updateESSProgress() {
+  var answered = 0;
+  for (var i = 0; i < essAnswers.length; i++) {
+    if (essAnswers[i] !== null) answered++;
+  }
+  var pct = (answered / 8) * 100;
+  document.getElementById('ess-progress-fill').style.width = pct + '%';
+  document.getElementById('ess-progress-count').textContent = answered + ' / 8';
+  // Enable submit when all answered
+  document.getElementById('ess-submit').disabled = (answered < 8);
 }
 
-function getESSAdvice(score){
-if(score<=7)return'您的日间嗜睡程度在正常范围内。请继续保持良好的睡眠习惯。';
-if(score<=9)return'您有轻度嗜睡倾向。建议注意睡眠质量，保证充足睡眠时间，观察是否改善。';
-if(score<=15)return'您有中度嗜睡倾向，<strong>建议就医</strong>，进一步检查是否存在睡眠障碍。';
-return'您有重度嗜睡倾向，<strong>需要立即就医</strong>，请尽快前往睡眠医学中心或相关科室就诊。';
+// ===== Submit ESS =====
+function submitESS() {
+  var unanswered = -1;
+  for (var i = 0; i < essAnswers.length; i++) {
+    if (essAnswers[i] === null) { unanswered = i; break; }
+  }
+  if (unanswered >= 0) {
+    showToast('请完成第' + (unanswered+1) + '题');
+    return;
+  }
+  goToPage('sb-page');
 }
 
-function getSBRisk(score){
-if(score<=2)return{level:'低风险',cls:'risk-low'};
-if(score<=4)return{level:'中风险',cls:'risk-medium'};
-return{level:'高风险',cls:'risk-high'};
+// ===== Render STOP-Bang Questions =====
+function renderSB() {
+  var container = document.getElementById('sb-questions');
+  var html = '';
+  for (var i = 0; i < sbQuestions.length; i++) {
+    var q = sbQuestions[i];
+    html += '<div class="question-card" id="sb-card-' + i + '">';
+    html += '<div class="q-header">';
+    html += '<div class="q-number">' + (i+1) + '</div>';
+    html += '<div class="q-title">' + q.text + '</div>';
+    html += '<div class="q-tag">' + q.tag + '</div>';
+    html += '</div>';
+    html += '<div class="sb-opts">';
+    html += '<div class="sb-opt" data-q="' + i + '" data-val="0" onclick="selectSB(' + i + ',0)">';
+    html += '<div class="sb-check"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>';
+    html += '<span class="sb-text">否</span>';
+    html += '</div>';
+    html += '<div class="sb-opt" data-q="' + i + '" data-val="1" onclick="selectSB(' + i + ',1)">';
+    html += '<div class="sb-check"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>';
+    html += '<span class="sb-text">是</span>';
+    html += '</div>';
+    html += '</div>';
+    html += '</div>';
+  }
+  container.innerHTML = html;
 }
 
-function getSBAdvice(score){
-if(score<=2)return'您患睡眠呼吸暂停的风险较低。如有相关症状，建议持续关注。';
-if(score<=4)return'您患睡眠呼吸暂停的风险为中等。<strong>建议咨询医生</strong>，必要时进行睡眠监测。';
-return'您患睡眠呼吸暂停的风险较高，<strong>强烈建议就医</strong>，进行多导睡眠监测等进一步检查。';
+// ===== Select STOP-Bang Option =====
+function selectSB(qIdx, val) {
+  sbAnswers[qIdx] = val;
+  // Update visual state
+  var card = document.getElementById('sb-card-' + qIdx);
+  var opts = card.querySelectorAll('.sb-opt');
+  for (var i = 0; i < opts.length; i++) {
+    opts[i].classList.remove('selected-yes');
+    opts[i].classList.remove('selected-no');
+  }
+  if (val === 1) {
+    opts[1].classList.add('selected-yes');
+  } else {
+    opts[0].classList.add('selected-no');
+  }
+  // Update progress
+  updateSBProgress();
 }
 
-function showResult(){
-var allAnswered=true;
-for(var i=0;i<sbQuestions.length;i++){
-if(sbAnswers[sbQuestions[i].field]===undefined){allAnswered=false;break}
-}
-if(!allAnswered){
-alert('请完成所有题目后再查看结果');
-return;
-}
-var essScore=0;
-for(var i=0;i<essQuestions.length;i++){essScore+=essAnswers[essQuestions[i].field]||0}
-var sbScore=0;
-for(var i=0;i<sbQuestions.length;i++){if(sbAnswers[sbQuestions[i].field]==='是')sbScore++}
-var essRisk=getESSRisk(essScore);
-var sbRisk=getSBRisk(sbScore);
-var html='';
-html+='<div class="result-card">';
-html+='<h3>ESS嗜睡量表 <span class="badge" style="background:#ebf4ff;color:var(--primary)">8题</span></h3>';
-html+='<div class="score-display"><span class="score-number">'+essScore+'</span><span class="score-max">/ 24分</span></div>';
-html+='<span class="risk-badge '+essRisk.cls+'">'+essRisk.level+'</span>';
-html+='<div class="advice">'+getESSAdvice(essScore)+'</div>';
-html+='</div>';
-html+='<div class="result-card">';
-html+='<h3>STOP-Bang量表 <span class="badge" style="background:#ebf4ff;color:var(--primary)">8题</span></h3>';
-html+='<div class="score-display"><span class="score-number">'+sbScore+'</span><span class="score-max">/ 8分</span></div>';
-html+='<span class="risk-badge '+sbRisk.cls+'">'+sbRisk.level+'</span>';
-html+='<div class="advice">'+getSBAdvice(sbScore)+'</div>';
-html+='</div>';
-html+='<div class="result-card" style="background:#f0fff4;border:1px solid #c6f6d5">';
-html+='<h3 style="color:#22543d">综合建议</h3>';
-html+='<div class="advice" style="background:#f0fff4">';
-if(essScore>=10||sbScore>=5){
-html+='您的筛查结果显示存在<strong>较明显的睡眠健康风险</strong>，建议尽快前往医院睡眠医学中心或呼吸内科就诊，进行专业评估和睡眠监测。';
-}else if(essScore>=8||sbScore>=3){
-html+='您的筛查结果显示存在<strong>一定程度的睡眠健康风险</strong>，建议咨询医生，关注睡眠质量，必要时进行进一步检查。';
-}else{
-html+='您的筛查结果整体正常。请继续保持良好的睡眠和生活习惯，定期关注睡眠健康。';
-}
-html+='</div></div>';
-document.getElementById('result-content').innerHTML=html;
-goToPage('page-result');
+// ===== Update SB Progress =====
+function updateSBProgress() {
+  var answered = 0;
+  for (var i = 0; i < sbAnswers.length; i++) {
+    if (sbAnswers[i] !== null) answered++;
+  }
+  var pct = (answered / 8) * 100;
+  document.getElementById('sb-progress-fill').style.width = pct + '%';
+  document.getElementById('sb-progress-count').textContent = answered + ' / 8';
+  document.getElementById('sb-submit').disabled = (answered < 8);
 }
 
-function submitToAirtable(){
-var btn=document.getElementById('submit-btn');
-btn.disabled=true;
-btn.textContent='提交中...';
-document.getElementById('loading').classList.add('show');
-var essScore=0;
-for(var i=0;i<essQuestions.length;i++){essScore+=essAnswers[essQuestions[i].field]||0}
-var sbScore=0;
-for(var i=0;i<sbQuestions.length;i++){if(sbAnswers[sbQuestions[i].field]==='是')sbScore++}
-var essRisk=getESSRisk(essScore);
-var sbRisk=getSBRisk(sbScore);
-var now=new Date();
-var pad=function(n){return n<10?'0'+n:''+n};
-var submitTime=now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())+' '+pad(now.getHours())+':'+pad(now.getMinutes())+':'+pad(now.getSeconds());
-var fields={
-'提交时间':submitTime,
-'ESS得分':essScore,
-'ESS风险等级':essRisk.level,
-'ESS_坐着阅读':essAnswers['ESS_坐着阅读']||0,
-'ESS_看电视':essAnswers['ESS_看电视']||0,
-'ESS_公共场所':essAnswers['ESS_公共场所']||0,
-'ESS_乘车一小时':essAnswers['ESS_乘车一小时']||0,
-'ESS_午后躺下':essAnswers['ESS_午后躺下']||0,
-'ESS_与人交谈':essAnswers['ESS_与人交谈']||0,
-'ESS_午饭后静坐':essAnswers['ESS_午饭后静坐']||0,
-'ESS_遇堵停车':essAnswers['ESS_遇堵停车']||0,
-'STOPBANG得分':sbScore,
-'STOPBANG风险等级':sbRisk.level,
-'SB_鼾声':sbAnswers['SB_鼾声']||'',
-'SB_疲倦':sbAnswers['SB_疲倦']||'',
-'SB_观察到':sbAnswers['SB_观察到']||'',
-'SB_血压':sbAnswers['SB_血压']||'',
-'SB_BMI':sbAnswers['SB_BMI']||'',
-'SB_年龄':sbAnswers['SB_年龄']||'',
-'SB_颈围':sbAnswers['SB_颈围']||'',
-'SB_性别':sbAnswers['SB_性别']||'',
-'来源渠道':'患者活动'
-};
-var xhr=new XMLHttpRequest();
-xhr.open('POST',AIRTABLE_URL,true);
-xhr.setRequestHeader('Authorization','Bearer '+AIRTABLE_TOKEN);
-xhr.setRequestHeader('Content-Type','application/json');
-xhr.onreadystatechange=function(){
-if(xhr.readyState===4){
-document.getElementById('loading').classList.remove('show');
-if(xhr.status>=200&&xhr.status<300){
-showSuccess();
-}else{
-btn.disabled=false;
-btn.textContent='重新提交';
-var errMsg='提交失败';
-try{var resp=JSON.parse(xhr.responseText);if(resp.error&&resp.error.message)errMsg=resp.error.message}catch(e){}
-alert('提交失败：'+errMsg+'（状态码：'+xhr.status+'）\n\n请检查网络后重试，或联系现场工作人员。');
-}
-}
-};
-xhr.send(JSON.stringify({records:[{fields:fields}]}));
+// ===== Submit STOP-Bang & Show Results =====
+function submitSB() {
+  var unanswered = -1;
+  for (var i = 0; i < sbAnswers.length; i++) {
+    if (sbAnswers[i] === null) { unanswered = i; break; }
+  }
+  if (unanswered >= 0) {
+    showToast('请完成第' + (unanswered+1) + '题');
+    return;
+  }
+  // Calculate scores
+  essScore = 0;
+  for (var i = 0; i < essAnswers.length; i++) {
+    essScore += essOptions[essAnswers[i]].score;
+  }
+  sbScore = 0;
+  for (var j = 0; j < sbAnswers.length; j++) {
+    sbScore += sbAnswers[j];
+  }
+  // Determine levels
+  if (essScore <= 7) essLevel = "正常";
+  else if (essScore <= 9) essLevel = "轻度嗜睡";
+  else if (essScore <= 15) essLevel = "中度嗜睡";
+  else essLevel = "重度嗜睡";
+
+  if (sbScore <= 2) sbLevel = "低风险";
+  else if (sbScore <= 4) sbLevel = "中风险";
+  else sbLevel = "高风险";
+
+  // Render result
+  renderResult();
+  goToPage('result-page');
 }
 
-function showSuccess(){
-var btn=document.getElementById('submit-btn');
-btn.style.display='none';
-var msg=document.getElementById('success-msg');
-msg.style.display='block';
-msg.innerHTML='<div class="success-page">'+
-'<svg class="success-icon" viewBox="0 0 52 52"><circle cx="26" cy="26" r="25" fill="none" stroke="#38a169" stroke-width="2"/><path fill="none" stroke="#38a169" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" d="M14 27l8 8l16-16"/></svg>'+
-'<h2>提交成功</h2><p>您的筛查数据已成功记录。<br>感谢您的参与！</p></div>';
+// ===== Render Result =====
+function renderResult() {
+  var essLevelClass = essScore <= 7 ? 'level-normal' : essScore <= 9 ? 'level-mild' : essScore <= 15 ? 'level-moderate' : 'level-severe';
+  var sbLevelClass = sbScore <= 2 ? 'level-low' : sbScore <= 4 ? 'level-mid' : 'level-high';
+  var essColor = essScore <= 7 ? '#5ba035' : essScore <= 9 ? '#e89500' : essScore <= 15 ? '#e8534f' : '#cc3333';
+  var sbColor = sbScore <= 2 ? '#5ba035' : sbScore <= 4 ? '#e89500' : '#e8534f';
+
+  var essDesc = '';
+  if (essScore >= 16) essDesc = '您属于重度日间嗜睡，可能已严重影响您的工作和生活，甚至引发认知及心血管风险，建议尽快就诊。';
+  else if (essScore >= 10) essDesc = '您属于中度日间嗜睡，警惕驾驶安全、工作效率影响，建议进行睡眠监测进一步排查病因。';
+  else if (essScore >= 8) essDesc = '您属于轻度日间嗜睡，建议关注睡眠质量，必要时咨询医师。';
+  else essDesc = '恭喜您日间精力充沛，思路时刻清晰。';
+
+  var sbDesc = '';
+  if (sbScore >= 5) sbDesc = '您非常可能存在中重度OSA，睡眠健康红灯警示，警惕心脑血管、代谢及多系统并发症，建议尽快就诊。';
+  else if (sbScore >= 3) sbDesc = '您的中重度OSA风险明显升高，不是"睡得香"，需警惕多系统缺氧损伤及心血管风险，建议尽快进行睡眠监测。';
+  else sbDesc = '恭喜您OSA风险较低，夜间睡眠安稳，日间精力充沛。';
+
+  var html = '';
+  // ESS Score
+  html += '<div class="result-score-block">';
+  html += '<div class="result-score-label">ESS 嗜睡量表</div>';
+  html += '<div class="result-score-num" style="color:' + essColor + '">' + essScore + '<span style="font-size:16px;color:#999;font-weight:400"> / 24</span></div>';
+  html += '<div class="result-score-level ' + essLevelClass + '">' + essLevel + '</div>';
+  html += '<div class="result-score-desc">' + essDesc + '</div>';
+  html += '</div>';
+  html += '<div class="result-divider"></div>';
+  // STOP-Bang Score
+  html += '<div class="result-score-block">';
+  html += '<div class="result-score-label">STOP-Bang 量表</div>';
+  html += '<div class="result-score-num" style="color:' + sbColor + '">' + sbScore + '<span style="font-size:16px;color:#999;font-weight:400"> / 8</span></div>';
+  html += '<div class="result-score-level ' + sbLevelClass + '">' + sbLevel + '</div>';
+  html += '<div class="result-score-desc">' + sbDesc + '</div>';
+  html += '</div>';
+  html += '<div class="result-divider"></div>';
+  // Summary
+  html += '<div style="font-size:12px;color:#999;line-height:1.6;text-align:left;padding:0 4px">';
+  html += '<p style="margin-bottom:4px">评分标准：</p>';
+  html += '<p style="margin-bottom:2px">ESS：0-7正常 | 8-9轻度 | 10-15中度（建议就医）| 16-24重度（需立即就医）</p>';
+  html += '<p>STOP-Bang：0-2低风险 | 3-4中风险 | 5-8高风险</p>';
+  html += '</div>';
+
+  document.getElementById('result-content').innerHTML = html;
 }
 
+// ===== Submit to Airtable =====
+function submitToAirtable() {
+  var btn = document.getElementById('result-submit-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner" style="width:20px;height:20px;border-width:2px;margin:0"></div> 提交中...';
+
+  var now = new Date();
+  var timestamp = now.getFullYear() + '-' + 
+    String(now.getMonth()+1).padStart(2,'0') + '-' +
+    String(now.getDate()).padStart(2,'0') + ' ' +
+    String(now.getHours()).padStart(2,'0') + ':' +
+    String(now.getMinutes()).padStart(2,'0');
+
+  var essLabels = ['从不','轻微','中等','很可能'];
+  var essFieldKeys = ['ESS_坐着阅读','ESS_看电视','ESS_公共场所','ESS_乘车一小时','ESS_午后躺下','ESS_与人交谈','ESS_午饭后静坐','ESS_遇堵停车'];
+  var sbFieldKeys = ['SB_鼾声','SB_疲倦','SB_观察到','SB_血压','SB_BMI','SB_年龄','SB_颈围','SB_性别'];
+
+  var fields = {
+    '提交时间': timestamp,
+    'ESS得分': essScore,
+    'ESS风险等级': essLevel,
+    'STOPBANG得分': sbScore,
+    'STOPBANG风险等级': sbLevel,
+    '来源渠道': 'web'
+  };
+
+  for (var i = 0; i < essAnswers.length; i++) {
+    fields[essFieldKeys[i]] = essLabels[essAnswers[i]] + '(' + essOptions[essAnswers[i]].score + ')';
+  }
+  for (var j = 0; j < sbAnswers.length; j++) {
+    fields[sbFieldKeys[j]] = sbAnswers[j] === 1 ? '是' : '否';
+  }
+
+  var url = 'https://api.airtable.com/v0/' + AIRTABLE_BASE + '/' + encodeURIComponent(AIRTABLE_TABLE);
+  var body = JSON.stringify({records: [{fields: fields}]});
+
+  fetch(url, {
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer ' + AIRTABLE_TOKEN,
+      'Content-Type': 'application/json'
+    },
+    body: body
+  })
+  .then(function(resp) {
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    return resp.json();
+  })
+  .then(function(data) {
+    goToPage('thanks-page');
+  })
+  .catch(function(err) {
+    console.error('Airtable error:', err);
+    showToast('提交失败，请重试');
+    btn.disabled = false;
+    btn.innerHTML = '提交数据';
+  });
+}
+
+// ===== Reset =====
+function resetAll() {
+  essAnswers = [null,null,null,null,null,null,null,null];
+  sbAnswers = [null,null,null,null,null,null,null,null];
+  essScore = 0;
+  sbScore = 0;
+  essLevel = "";
+  sbLevel = "";
+  renderESS();
+  renderSB();
+  updateESSProgress();
+  updateSBProgress();
+  var btn = document.getElementById('result-submit-btn');
+  btn.disabled = false;
+  btn.innerHTML = '提交数据';
+  goToPage('welcome-page');
+}
+
+// ===== Init =====
 renderESS();
 renderSB();
 </script>
